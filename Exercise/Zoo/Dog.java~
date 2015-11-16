@@ -1,9 +1,0 @@
-public class Dog extends Animals {
-
-  public Fox(){
-  }
-  public void kind() {
-      System.out.println("Én egy kutya vagyok.");
-  }
-
-}
