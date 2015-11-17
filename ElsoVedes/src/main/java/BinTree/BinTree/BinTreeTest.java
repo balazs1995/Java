@@ -1,123 +1,113 @@
 package BinTree;
 
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-
 public class BinTreeTest {
 
-	static boolean isComment = false;
-	static BinTree binTree = new BinTree();
-	static final int bitmask = 128;
-	static Pattern pattern = new Pattern("010101");
-	static String current = "";
+    static boolean isComment = false;
+    static BinTree binTree = new BinTree();
+    static final int bitmask = 128;
+    static Pattern pattern = new Pattern("010101");
+    static String current = "";
 
-	static void giveElement(int readChar) {
+    static void giveElement(int readChar) {
 
+        for (int i = 0; i < 8; ++i) {
+            if ((readChar & bitmask) == bitmask) {
+                binTree.addElement('1');
+                current += "1";
+            } else {
+                binTree.addElement('0');
+                current += "0";
+            }
+            readChar <<= 1;
 
-				for (int i = 0; i < 8; ++i) {
-					if ((readChar & bitmask) == bitmask) {
-						binTree.addElement('1');
-						current += "1";
-					} else {
-						binTree.addElement('0');
-						current += "0";
-					}
-					readChar <<= 1;
+            if (pattern.getPatternLength() == i - 1) {
+                pattern.checkPattern(current);
+                current = "";
+            }
+        }
+    }
 
-					if (pattern.getPatternLength() == i-1) {
-						pattern.checkPattern(current);
-						current = "";
-					}
-				}
-}
+    public static void printOut(String outputFileName) throws IOException {
 
+        BufferedWriter output = new BufferedWriter(new FileWriter(outputFileName));
+        //	binTree.writeOut(output, binTree.getRoot());
 
-	public static void printOut(String outputFileName) throws IOException {
+        output.write("\nData:\n");
+        output.write("depth = " + binTree.getDeep() + "\n");
+        output.write("mean = " + String.format("%.4f", binTree.getAverage()) + "\n");
+        output.write("var = " + String.format("%.5f", binTree.getDeviation()) + "\n");
 
-		BufferedWriter output = new BufferedWriter(new FileWriter(outputFileName));
-	//	binTree.writeOut(output, binTree.getRoot());
+        output.close();
+    }
 
-		output.write("\nData:\n");
-		output.write("depth = " + binTree.getDeep() + "\n");
-		output.write("mean = " + String.format("%.4f", binTree.getAverage()) + "\n");
-		output.write("var = " + String.format("%.5f", binTree.getDeviation()) + "\n");
+    public static boolean reading(char readChar) { // Érvényes karaktert olvastunk-e?
 
-		output.close();
-	}
+        // Ha sign == false, akkor a karakter rendben, de ha a sign == true, akkor continue-zni kéne..
+        boolean sign = false; // continue kiváltása
+        if (readChar == '>') {
+            isComment = true;
+            sign = true;
+        }
+        if (readChar == '\n') {
+            isComment = false;
+            sign = true;
+        }
+        if (isComment || (readChar == 'N')) {
+            sign = true;
+        }
 
+        return sign;
 
-	public static boolean reading(char readChar) { // Érvényes karaktert olvastunk-e?
+    }
 
+    public static void start(String inputFileName) {
 
-		// Ha sign == false, akkor a karakter rendben, de ha a sign == true, akkor continue-zni kéne..
-		boolean sign = false; // continue kiváltása
-		if (readChar == '>') {
-			isComment = true;
-			sign = true;
-		}
-		if (readChar == '\n') {
-			isComment = false;
-			sign = true;
-		}
-		if (isComment || (readChar == 'N')) {
-			sign = true;
-		}
+        char readChar = '0';
+        int readInt = 0;
+        boolean validCharacter = false;
 
-		return sign;
+        try {
 
-	}
+            BufferedReader input = new BufferedReader(new FileReader(inputFileName));
 
+            while ((readInt = input.read()) != -1) {
+                readChar = (char) readInt;
 
-	public static void start(String inputFileName) {
+                validCharacter = reading(readChar); // Ha false-t add vissza, akkor rendben, nem kellett continue-zni az eredeti kódban
+                if (validCharacter == false) {
+                    giveElement(readInt);
+                } // if end
+            } // while loop end
+            input.close();
 
-		char readChar = '0';
-		int readInt = 0;
-		boolean validCharacter = false;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
 
-		try {
+    }
 
-			BufferedReader input = new BufferedReader(new FileReader(inputFileName));
+    public static void main(String[] args) {
 
-			while ((readInt = input.read()) != -1) {
-				readChar = (char) readInt;
+        if (args.length != 2) {
+            System.err.println("java BinTree inputFileName outputFileName");
+            return;
+        }
 
-				validCharacter = reading(readChar); // Ha false-t add vissza, akkor rendben, nem kellett continue-zni az eredeti kódban
-				if (validCharacter == false) {
-					giveElement(readInt);
-				} // if end
-			} // while loop end
-			input.close();
+        try {
 
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
+            start(args[0]);
+            printOut(args[1]);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
 
-	}
+        System.out.println(pattern.getPatternsNumber());
 
-
-
-	public static void main(String[] args) {
-
-		if (args.length != 2) {
-			System.err.println("java BinTree inputFileName outputFileName");
-			return;
-		}
-
-
-		try {
-
-			start(args[0]);
-			printOut(args[1]);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-
-		System.out.println(pattern.getPatternsNumber());
-
-	}
+    }
 }
